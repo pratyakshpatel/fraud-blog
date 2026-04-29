@@ -15,9 +15,6 @@ HOP_COLORS = [FRAUD, ACCENT, "#FFE066", GREEN]  # 0-hop (target), 1-hop, 2-hop, 
 
 class ReceptiveField(Scene):
     def construct(self):
-        title = Text("GNN Receptive Field", font_size=28, color=WHITE).to_edge(UP, buff=0.4)
-        self.play(Write(title), run_time=0.8)
-
         np.random.seed(3)
 
         # Create a graph with clear hop structure
@@ -76,25 +73,23 @@ class ReceptiveField(Scene):
         # Move everything slightly left to make room
         graph_group = VGroup(edge_lines, VGroup(*node_circles.values()))
 
-        self.play(Create(edge_lines), FadeIn(VGroup(*node_circles.values())), FadeIn(caption), run_time=1.0)
-        self.wait(0.5)
+        self.play(Create(edge_lines), FadeIn(VGroup(*node_circles.values())), FadeIn(caption), run_time=0.5)
+        self.wait(0.4)
 
         # Highlight target node
         self.play(
             node_circles[0].animate.set_color(HOP_COLORS[0]).set_fill(HOP_COLORS[0]),
-            run_time=0.8
+            run_time=0.5
         )
 
-        target_label = Text("Target", font_size=12, color=HOP_COLORS[0]).next_to(node_circles[0], DOWN, buff=0.1)
-        self.play(FadeIn(target_label), run_time=0.5)
-        self.wait(0.5)
+        self.wait(0.4)
 
         # Layer counter
         layer_counter = VGroup(
             Text("Layers:", font_size=16, color=ACCENT),
             Text("0", font_size=22, color=ACCENT)
         ).arrange(RIGHT, buff=0.15).move_to(RIGHT * 5.0 + UP * 2.0)
-        self.play(FadeIn(layer_counter), run_time=0.8)
+        self.play(FadeIn(layer_counter), run_time=0.5)
 
         hop_groups = {1: range(1, 5), 2: range(5, 11), 3: range(11, 15)}
         hop_labels = {
@@ -112,9 +107,9 @@ class ReceptiveField(Scene):
             self.play(
                 Transform(caption, new_caption),
                 Transform(layer_counter[1], new_layer_count),
-                run_time=0.8
+                run_time=0.5
             )
-            self.wait(0.5)
+            self.wait(0.4)
 
             # Pulse animation - messages flowing from previous layer to current
             pulse_dots = []
@@ -131,7 +126,7 @@ class ReceptiveField(Scene):
             if pulse_anims:
                 for dot in pulse_dots:
                     self.add(dot)
-                self.play(*pulse_anims, run_time=0.8)
+                self.play(*pulse_anims, run_time=0.5)
                 for dot in pulse_dots:
                     self.remove(dot)
 
@@ -141,42 +136,42 @@ class ReceptiveField(Scene):
                     node_circles[i].animate.set_color(HOP_COLORS[layer]).set_fill(HOP_COLORS[layer])
                     for i in hop_groups[layer]
                 ],
-                run_time=0.8,
+                run_time=0.5,
             )
 
-            self.wait(0.5)
+            self.wait(0.4)
 
         # === OVER-SMOOTHING WARNING ===
         smooth_caption = Text(
             "Too many layers → all nodes look the same (over-smoothing)",
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, smooth_caption), run_time=0.8)
-        self.wait(0.5)
+        self.play(Transform(caption, smooth_caption), run_time=0.5)
+        self.wait(0.4)
 
         # Continue layers until everything becomes gray
         for extra_layer in range(4, 8):
             new_layer_count = Text(str(extra_layer), font_size=22, color=FRAUD)
             new_layer_count.move_to(layer_counter[1].get_center())
-            self.play(Transform(layer_counter[1], new_layer_count), run_time=0.3)
+            self.play(Transform(layer_counter[1], new_layer_count), run_time=0.34)
 
         # Fade all to same gray
         self.play(
             *[node_circles[i].animate.set_color(NEUTRAL).set_fill(NEUTRAL) for i in range(15)],
-            run_time=1.0,
+            run_time=0.5,
         )
 
         identity_lost = Text("Identity lost!", font_size=16, color=FRAUD).move_to(RIGHT * 5.0 + DOWN * 0.5)
-        self.play(FadeIn(identity_lost), run_time=0.8)
-        self.wait(0.5)
+        self.play(FadeIn(identity_lost), run_time=0.5)
+        self.wait(0.4)
 
         # === SIDE-BY-SIDE COMPARISON ===
         compare_caption = Text(
             "2-3 layers optimal: enough context, distinct embeddings",
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, compare_caption), FadeOut(identity_lost), run_time=0.8)
-        self.wait(0.5)
+        self.play(Transform(caption, compare_caption), FadeOut(identity_lost), run_time=0.5)
+        self.wait(0.4)
 
         # Split screen boxes
         left_box = VGroup(
@@ -208,16 +203,12 @@ class ReceptiveField(Scene):
             for i in range(6)
         ])
 
-        left_label = Text("Distinct colors", font_size=10, color=GREEN).move_to(LEFT * 4.5 + DOWN * 2.0)
-        right_label = Text("All same (gray)", font_size=10, color=FRAUD).move_to(RIGHT * 4.5 + DOWN * 2.0)
-
         self.play(
             FadeIn(left_box), FadeIn(right_box),
             FadeIn(mini_nodes_left), FadeIn(mini_nodes_right),
-            FadeIn(left_label), FadeIn(right_label),
-            run_time=1.0
+            run_time=0.5
         )
-        self.wait(0.5)
+        self.wait(0.4)
 
         # Final caption
         final = Text(
@@ -225,5 +216,5 @@ class ReceptiveField(Scene):
             font_size=18, color=ACCENT,
         ).to_edge(DOWN, buff=0.4)
 
-        self.play(Transform(caption, final), run_time=0.8)
-        self.wait(2.0)
+        self.play(Transform(caption, final), run_time=0.5)
+        self.wait(0.4)

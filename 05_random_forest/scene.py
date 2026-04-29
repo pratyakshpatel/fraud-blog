@@ -45,9 +45,6 @@ def mini_tree(root_pos, color, label, seed=0):
 
 class RandomForest(Scene):
     def construct(self):
-        title = Text("Random Forest: Ensemble Power", font_size=28, color=WHITE).to_edge(UP, buff=0.4)
-        self.play(Write(title), run_time=0.8)
-
         # === TRAINING DATA ===
         caption = Text(
             "Training data: many rows of user transactions",
@@ -78,16 +75,16 @@ class RandomForest(Scene):
         data_rows.arrange(DOWN, buff=0.12, aligned_edge=LEFT).move_to(LEFT * 4 + UP * 0.8).scale(0.9)
         data_box = SurroundingRectangle(data_rows, color=SOFT, buff=0.15, stroke_width=1.5)
 
-        self.play(FadeIn(data_rows), Create(data_box), FadeIn(caption), run_time=1.0)
-        self.wait(0.8)
+        self.play(FadeIn(data_rows), Create(data_box), FadeIn(caption), run_time=0.5)
+        self.wait(0.4)
 
         # === BOOTSTRAP SAMPLING ===
         bootstrap_caption = Text(
             "Bootstrap: randomly sample rows (with replacement) for each tree",
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, bootstrap_caption), run_time=0.8)
-        self.wait(0.5)
+        self.play(Transform(caption, bootstrap_caption), run_time=0.5)
+        self.wait(0.4)
 
         # Show samples flying to different piles
         sample_piles = VGroup()
@@ -97,7 +94,7 @@ class RandomForest(Scene):
             pile_label = Text(f"Sample {i+1}", font_size=11, color=TREE_COLORS[i]).move_to(pos + UP * 2.0)
             sample_piles.add(pile_label)
 
-        self.play(FadeIn(sample_piles), run_time=0.8)
+        self.play(FadeIn(sample_piles), run_time=0.5)
 
         # Animate a few rows flying to piles
         for pile_idx in range(5):
@@ -110,10 +107,10 @@ class RandomForest(Scene):
             self.add(fly_dots)
             self.play(
                 *[dot.animate.move_to(pile_positions[pile_idx] + UP * (1.0 + 0.2 * j)) for j, dot in enumerate(fly_dots)],
-                run_time=0.5
+                run_time=0.34
             )
 
-        self.wait(0.5)
+        self.wait(0.4)
 
         # === GROW TREES IN PARALLEL ===
         tree_caption = Text(
@@ -123,9 +120,9 @@ class RandomForest(Scene):
         self.play(
             Transform(caption, tree_caption),
             FadeOut(data_rows), FadeOut(data_box), FadeOut(sample_piles),
-            run_time=0.8
+            run_time=0.5
         )
-        self.wait(0.5)
+        self.wait(0.4)
 
         # Create 5 trees
         tree_xs = [LEFT * 4.8, LEFT * 2.4, ORIGIN, RIGHT * 2.4, RIGHT * 4.8]
@@ -135,21 +132,21 @@ class RandomForest(Scene):
         ])
 
         # Animate trees growing (fade in with slight delay)
-        self.play(FadeIn(trees, lag_ratio=0.2), run_time=1.2)
-        self.wait(0.8)
+        self.play(FadeIn(trees, lag_ratio=0.2), run_time=0.95)
+        self.wait(0.4)
 
         # === VOTING ===
         vote_caption = Text(
             "New user arrives — every tree votes independently",
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, vote_caption), run_time=0.8)
-        self.wait(0.5)
+        self.play(Transform(caption, vote_caption), run_time=0.5)
+        self.wait(0.4)
 
         # User enters
         user_dot = Circle(radius=0.15, color=ACCENT, fill_color=ACCENT, fill_opacity=0.9).move_to(UP * 2.8)
         user_label = Text("New User", font_size=12, color=ACCENT).next_to(user_dot, UP, buff=0.1)
-        self.play(FadeIn(user_dot), FadeIn(user_label), run_time=0.8)
+        self.play(FadeIn(user_dot), FadeIn(user_label), run_time=0.5)
 
         # Send user through all trees (simultaneously)
         user_copies = VGroup(*[
@@ -160,9 +157,9 @@ class RandomForest(Scene):
 
         self.play(
             *[user_copies[i].animate.move_to(tree_xs[i] + UP * 0.8) for i in range(5)],
-            run_time=0.8
+            run_time=0.5
         )
-        self.play(FadeOut(user_copies), run_time=0.5)
+        self.play(FadeOut(user_copies), run_time=0.34)
 
         # Show votes
         random.seed(42)
@@ -174,23 +171,23 @@ class RandomForest(Scene):
             vote_text = Text(result, font_size=10, color=WHITE).move_to(vote_ball.get_center())
             votes.add(VGroup(vote_ball, vote_text))
 
-        self.play(FadeIn(votes, lag_ratio=0.15), run_time=1.0)
-        self.wait(0.8)
+        self.play(FadeIn(votes, lag_ratio=0.15), run_time=0.5)
+        self.wait(0.4)
 
         # === COUNT VOTES ===
         count_caption = Text(
             "Majority vote: 3 FRAUD vs 2 OK → Final prediction: FRAUD",
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, count_caption), run_time=0.8)
+        self.play(Transform(caption, count_caption), run_time=0.5)
 
         # Highlight fraud votes
         fraud_votes = VGroup(votes[0], votes[1], votes[3])
         self.play(
             *[Indicate(v[0], color=FRAUD, scale_factor=1.3) for v in fraud_votes],
-            run_time=0.8
+            run_time=0.5
         )
-        self.wait(0.5)
+        self.wait(0.4)
 
         # Final result
         result_box = VGroup(
@@ -202,13 +199,13 @@ class RandomForest(Scene):
         result_box[2].move_to(result_box[0].get_center() + DOWN * 0.25)
         result_box.move_to(DOWN * 2.5)
 
-        self.play(FadeIn(result_box), run_time=0.8)
-        self.wait(0.5)
+        self.play(FadeIn(result_box), run_time=0.5)
+        self.wait(0.4)
 
         # Final caption
         final = Text(
             "Ensemble = more stable predictions + confidence estimates",
             font_size=18, color=ACCENT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, final), run_time=0.8)
-        self.wait(2.0)
+        self.play(Transform(caption, final), run_time=0.5)
+        self.wait(0.4)

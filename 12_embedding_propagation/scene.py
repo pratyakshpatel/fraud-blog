@@ -25,9 +25,6 @@ def blend_colors(colors):
 
 class EmbeddingPropagation(Scene):
     def construct(self):
-        title = Text("How Embeddings Propagate", font_size=28, color=WHITE).to_edge(UP, buff=0.4)
-        self.play(Write(title), run_time=0.8)
-
         # Graph layout
         center_pos = LEFT * 1.5
         nb_pos = {
@@ -81,9 +78,9 @@ class EmbeddingPropagation(Scene):
             FadeIn(VGroup(n47, t47, nA, tA, nB, tB, nC, tC, nD, tD)),
             FadeIn(VGroup(bar_47, bar_A, bar_B, bar_C)),
             FadeIn(caption),
-            run_time=1.0,
+            run_time=0.5,
         )
-        self.wait(0.8)
+        self.wait(0.4)
 
         # === LAYER 1 AGGREGATION ===
         layer1_caption = Text(
@@ -92,8 +89,8 @@ class EmbeddingPropagation(Scene):
         ).to_edge(DOWN, buff=0.4)
 
         layer_label = Text("Layer 1", font_size=18, color=ACCENT).move_to(RIGHT * 5.0 + UP * 2.0)
-        self.play(Transform(caption, layer1_caption), FadeIn(layer_label), run_time=0.8)
-        self.wait(0.5)
+        self.play(Transform(caption, layer1_caption), FadeIn(layer_label), run_time=0.5)
+        self.wait(0.4)
 
         # Animate colored dots flowing from neighbors to center
         dots = [
@@ -104,7 +101,7 @@ class EmbeddingPropagation(Scene):
         for d in dots:
             self.add(d)
 
-        self.play(*[MoveAlongPath(d, Line(d.get_center(), center_pos), rate_func=smooth) for d in dots], run_time=0.8)
+        self.play(*[MoveAlongPath(d, Line(d.get_center(), center_pos), rate_func=smooth) for d in dots], run_time=0.5)
 
         for d in dots:
             self.remove(d)
@@ -112,7 +109,7 @@ class EmbeddingPropagation(Scene):
         # Show aggregation (average/sum)
         agg_formula = MathTex(r"h_{47}^{(1)} = \sigma\left(W \cdot \frac{1}{4}(h_{47} + h_A + h_B + h_C)\right)", font_size=18, color=SOFT)
         agg_formula.move_to(RIGHT * 3.5 + UP * 0.5)
-        self.play(FadeIn(agg_formula), run_time=0.8)
+        self.play(FadeIn(agg_formula), run_time=0.5)
 
         # Show W matrix transform
         w_box = VGroup(
@@ -120,7 +117,7 @@ class EmbeddingPropagation(Scene):
             Text("W", font_size=16, color=PURPLE)
         ).arrange(ORIGIN).move_to(RIGHT * 3.5 + DOWN * 0.8)
         w_label = Text("(learnable)", font_size=10, color=PURPLE).next_to(w_box, DOWN, buff=0.08)
-        self.play(FadeIn(w_box), FadeIn(w_label), run_time=0.8)
+        self.play(FadeIn(w_box), FadeIn(w_label), run_time=0.5)
 
         # Update node 47's color to show blending
         blended_color_1 = blend_colors([LEGIT, FRAUD, GREEN, ACCENT])
@@ -130,10 +127,10 @@ class EmbeddingPropagation(Scene):
         self.play(
             n47.animate.set_color(blended_color_1).set_fill(blended_color_1),
             Transform(bar_47[0], new_bar_47),
-            run_time=0.8
+            run_time=0.5
         )
 
-        self.wait(0.8)
+        self.wait(0.4)
 
         # === LAYER 2 ===
         layer2_caption = Text(
@@ -142,18 +139,18 @@ class EmbeddingPropagation(Scene):
         ).to_edge(DOWN, buff=0.4)
         layer_label_2 = Text("Layer 2", font_size=18, color=ACCENT).move_to(RIGHT * 5.0 + UP * 2.0)
 
-        self.play(Transform(caption, layer2_caption), Transform(layer_label, layer_label_2), run_time=0.8)
-        self.wait(0.5)
+        self.play(Transform(caption, layer2_caption), Transform(layer_label, layer_label_2), run_time=0.5)
+        self.wait(0.4)
 
         # Update formula
         new_formula = MathTex(r"h_{47}^{(2)} = \sigma\left(W \cdot \text{AGG}(h_{47}^{(1)}, h_A^{(1)}, h_B^{(1)}, h_C^{(1)})\right)", font_size=16, color=SOFT)
         new_formula.move_to(RIGHT * 3.5 + UP * 0.5)
-        self.play(Transform(agg_formula, new_formula), run_time=0.8)
+        self.play(Transform(agg_formula, new_formula), run_time=0.5)
 
         # Show neighbors have also updated
         neighbor_update_note = Text("(neighbors now contain THEIR neighbors' info)", font_size=12, color=SOFT)
         neighbor_update_note.move_to(RIGHT * 3.5 + UP * 1.3)
-        self.play(FadeIn(neighbor_update_note), run_time=0.8)
+        self.play(FadeIn(neighbor_update_note), run_time=0.5)
 
         # More message passing animation
         dots2 = [
@@ -164,7 +161,7 @@ class EmbeddingPropagation(Scene):
         for d in dots2:
             self.add(d)
 
-        self.play(*[MoveAlongPath(d, Line(d.get_center(), center_pos), rate_func=smooth) for d in dots2], run_time=0.8)
+        self.play(*[MoveAlongPath(d, Line(d.get_center(), center_pos), rate_func=smooth) for d in dots2], run_time=0.5)
 
         for d in dots2:
             self.remove(d)
@@ -173,33 +170,33 @@ class EmbeddingPropagation(Scene):
         blended_color_2 = blend_colors([blended_color_1, blended_color_1, blended_color_1, blended_color_1])
         self.play(
             n47.animate.set_color(blended_color_2).set_fill(blended_color_2),
-            run_time=0.8
+            run_time=0.5
         )
 
-        self.wait(0.8)
+        self.wait(0.4)
 
         # === NODE D IS TOO FAR ===
         far_caption = Text(
             "Node D is 4 hops away — 2 layers can't reach it!",
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, far_caption), run_time=0.8)
+        self.play(Transform(caption, far_caption), run_time=0.5)
 
         # Highlight node D
         d_ring = Circle(radius=0.4, color=FRAUD, stroke_width=4).move_to(far_pos)
-        self.play(Create(d_ring), run_time=0.8)
+        self.play(Create(d_ring), run_time=0.5)
 
         # Cross mark
         cross = VGroup(
             Line(far_pos + UP * 0.2 + LEFT * 0.2, far_pos + DOWN * 0.2 + RIGHT * 0.2, color=FRAUD, stroke_width=4),
             Line(far_pos + UP * 0.2 + RIGHT * 0.2, far_pos + DOWN * 0.2 + LEFT * 0.2, color=FRAUD, stroke_width=4),
         )
-        self.play(Create(cross), run_time=0.8)
+        self.play(Create(cross), run_time=0.5)
 
         # Show distance
         dist_label = Text("4 hops away", font_size=12, color=FRAUD).next_to(nD, DOWN, buff=0.4)
-        self.play(FadeIn(dist_label), run_time=0.8)
-        self.wait(0.5)
+        self.play(FadeIn(dist_label), run_time=0.5)
+        self.wait(0.4)
 
         # Final caption
         final = Text(
@@ -207,5 +204,5 @@ class EmbeddingPropagation(Scene):
             font_size=18, color=ACCENT,
         ).to_edge(DOWN, buff=0.4)
 
-        self.play(Transform(caption, final), run_time=0.8)
-        self.wait(2.0)
+        self.play(Transform(caption, final), run_time=0.5)
+        self.wait(0.4)

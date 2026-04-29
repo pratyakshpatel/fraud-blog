@@ -12,10 +12,6 @@ GREEN = "#2ECC71"
 
 class ImageVsGraph(Scene):
     def construct(self):
-        # === IMAGE GRID STRUCTURE ===
-        title = Text("Images vs Graphs", font_size=28, color=WHITE).to_edge(UP, buff=0.5)
-        self.play(Write(title), run_time=0.8)
-
         # Create 5x5 grid for better CNN demonstration
         SIZE = 0.55
         cells = VGroup()
@@ -38,16 +34,16 @@ class ImageVsGraph(Scene):
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
 
-        self.play(Create(cells), Write(nums), FadeIn(img_label), FadeIn(caption), run_time=1.2)
-        self.wait(0.8)
+        self.play(Create(cells), Write(nums), FadeIn(img_label), FadeIn(caption), run_time=0.95)
+        self.wait(0.4)
 
         # 3x3 filter demonstration
         filter_caption = Text(
             "A 3×3 filter slides across — fixed neighborhood at every position",
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, filter_caption), run_time=0.8)
-        self.wait(0.5)
+        self.play(Transform(caption, filter_caption), run_time=0.5)
+        self.wait(0.4)
 
         # Highlight 3x3 region
         def get_filter_rect(row, col):
@@ -62,11 +58,11 @@ class ImageVsGraph(Scene):
                 dot = Dot(radius=0.06, color=ACCENT).move_to(cells[r * 5 + c].get_center())
                 agg_dots.add(dot)
 
-        self.play(Create(fbox), FadeIn(agg_dots), run_time=0.8)
+        self.play(Create(fbox), FadeIn(agg_dots), run_time=0.5)
 
         # Fixed 9 neighbors annotation
         fixed_label = Text("Always 9 inputs", font_size=14, color=ACCENT).next_to(fbox, RIGHT, buff=0.2)
-        self.play(FadeIn(fixed_label), run_time=0.8)
+        self.play(FadeIn(fixed_label), run_time=0.5)
 
         # Slide filter across grid
         for row, col in [(0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]:
@@ -80,17 +76,17 @@ class ImageVsGraph(Scene):
                 Transform(fbox, new_fbox),
                 Transform(agg_dots, new_dots),
                 fixed_label.animate.next_to(new_fbox, RIGHT, buff=0.2),
-                run_time=0.5,
+                run_time=0.34,
                 rate_func=smooth
             )
 
-        self.wait(0.5)
-        self.play(FadeOut(VGroup(fbox, agg_dots, fixed_label)), run_time=0.8)
+        self.wait(0.4)
+        self.play(FadeOut(VGroup(fbox, agg_dots, fixed_label)), run_time=0.5)
 
         # === GRAPH STRUCTURE (side by side) ===
         # Keep grid on left, show graph on right
-        self.play(grid.animate.scale(0.7).move_to(LEFT * 4.5 + UP * 0.5), img_label.animate.scale(0.7).move_to(LEFT * 4.5 + UP * 2.2), run_time=1.0)
-        self.wait(0.5)
+        self.play(grid.animate.scale(0.7).move_to(LEFT * 4.5 + UP * 0.5), img_label.animate.scale(0.7).move_to(LEFT * 4.5 + UP * 2.2), run_time=0.5)
+        self.wait(0.4)
 
         graph_center = RIGHT * 2.0
         npos = {
@@ -123,16 +119,16 @@ class ImageVsGraph(Scene):
             FadeIn(all_nodes),
             FadeIn(graph_label),
             Transform(caption, graph_caption),
-            run_time=1.0
+            run_time=0.5
         )
-        self.wait(1.0)
+        self.wait(0.32)
 
         # Highlight variable neighborhood
         var_caption = Text(
             "Node 2 has 3 neighbors, Node 6 has only 2",
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, var_caption), run_time=0.8)
+        self.play(Transform(caption, var_caption), run_time=0.5)
 
         # Highlight node 2's neighborhood
         ring1 = Circle(radius=0.4, color=ACCENT, stroke_width=4).move_to(npos[1])
@@ -140,8 +136,8 @@ class ImageVsGraph(Scene):
             Arrow(npos[j], npos[1], buff=0.3, color=ACCENT, stroke_width=3, max_tip_length_to_length_ratio=0.2)
             for j in [0, 2, 3]
         ])
-        self.play(Create(ring1), Create(nb_arrows1), run_time=1.0)
-        self.wait(0.8)
+        self.play(Create(ring1), Create(nb_arrows1), run_time=0.5)
+        self.wait(0.4)
 
         # Then node 6's neighborhood (only 2 neighbors)
         ring2 = Circle(radius=0.4, color=GREEN, stroke_width=4).move_to(npos[5])
@@ -149,18 +145,18 @@ class ImageVsGraph(Scene):
             Arrow(npos[j], npos[5], buff=0.3, color=GREEN, stroke_width=3, max_tip_length_to_length_ratio=0.2)
             for j in [3, 4]
         ])
-        self.play(Create(ring2), Create(nb_arrows2), run_time=1.0)
-        self.wait(0.8)
+        self.play(Create(ring2), Create(nb_arrows2), run_time=0.5)
+        self.wait(0.4)
 
-        self.play(FadeOut(VGroup(ring1, ring2, nb_arrows1, nb_arrows2)), run_time=0.8)
-        self.wait(0.5)
+        self.play(FadeOut(VGroup(ring1, ring2, nb_arrows1, nb_arrows2)), run_time=0.5)
+        self.wait(0.4)
 
         # === PERMUTATION INVARIANCE ===
         perm_caption = Text(
             "Relabel nodes — the graph structure is identical",
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, perm_caption), run_time=0.8)
+        self.play(Transform(caption, perm_caption), run_time=0.5)
 
         # Show relabeling with animation
         remap = {0: "4", 1: "1", 2: "6", 3: "2", 4: "5", 5: "3"}
@@ -170,8 +166,8 @@ class ImageVsGraph(Scene):
             new_labels.append(Transform(vg[1], new_t))
             new_labels.append(vg[0].animate.set_stroke(ACCENT, width=3))
 
-        self.play(*new_labels, run_time=1.0)
-        self.wait(0.8)
+        self.play(*new_labels, run_time=0.5)
+        self.wait(0.4)
 
         # Final caption
         final_caption = Text(
@@ -179,5 +175,5 @@ class ImageVsGraph(Scene):
             font_size=18, color=ACCENT,
         ).to_edge(DOWN, buff=0.4)
 
-        self.play(Transform(caption, final_caption), run_time=0.8)
-        self.wait(2.0)
+        self.play(Transform(caption, final_caption), run_time=0.5)
+        self.wait(0.4)

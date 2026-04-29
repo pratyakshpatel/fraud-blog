@@ -29,9 +29,6 @@ def blend_colors(colors, weights=None):
 
 class MessagePassing(Scene):
     def construct(self):
-        title = Text("Message Passing in GNNs", font_size=28, color=WHITE).to_edge(UP, buff=0.4)
-        self.play(Write(title), run_time=0.8)
-
         # 5-node graph layout
         npos = {
             0: np.array([0.0, 1.5, 0]),     # top
@@ -69,8 +66,8 @@ class MessagePassing(Scene):
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
 
-        self.play(Create(edge_lines), FadeIn(all_nodes), FadeIn(caption), run_time=1.0)
-        self.wait(1.0)
+        self.play(Create(edge_lines), FadeIn(all_nodes), FadeIn(caption), run_time=0.5)
+        self.wait(0.32)
 
         # Track color history for final trace
         color_history = {i: [NODE_COLORS[i]] for i in range(5)}
@@ -97,7 +94,7 @@ class MessagePassing(Scene):
                 self.add(d)
 
             # Animate messages flowing
-            self.play(*anims, run_time=1.0)
+            self.play(*anims, run_time=0.5)
 
             # Compute new colors by averaging self + neighbors
             new_colors = {}
@@ -109,7 +106,7 @@ class MessagePassing(Scene):
                 color_history[i].append(new_colors[i])
 
             # Fade out message dots
-            self.play(*[FadeOut(d) for d in dots], run_time=0.5)
+            self.play(*[FadeOut(d) for d in dots], run_time=0.34)
 
             # Update node colors
             update_anims = []
@@ -117,62 +114,62 @@ class MessagePassing(Scene):
                 update_anims.append(node_circles[i].animate.set_color(new_colors[i]).set_fill(new_colors[i]))
                 color_state[i] = new_colors[i]
 
-            self.play(*update_anims, run_time=0.8)
+            self.play(*update_anims, run_time=0.5)
 
         # Round 1
         round1_caption = Text(
             "Round 1: Each node sends its color to neighbors, then averages",
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, round1_caption), run_time=0.8)
-        self.wait(0.5)
+        self.play(Transform(caption, round1_caption), run_time=0.5)
+        self.wait(0.4)
 
         # Pulse effect before sending
-        self.play(*[node_circles[i].animate.scale(1.15) for i in range(5)], run_time=0.5)
-        self.play(*[node_circles[i].animate.scale(1/1.15) for i in range(5)], run_time=0.5)
+        self.play(*[node_circles[i].animate.scale(1.15) for i in range(5)], run_time=0.34)
+        self.play(*[node_circles[i].animate.scale(1/1.15) for i in range(5)], run_time=0.34)
 
         send_messages(1)
-        self.wait(0.5)
+        self.wait(0.4)
 
         # Round 2
         round2_caption = Text(
             "Round 2: Blended colors spread further — information propagates",
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, round2_caption), run_time=0.8)
-        self.wait(0.5)
+        self.play(Transform(caption, round2_caption), run_time=0.5)
+        self.wait(0.4)
 
-        self.play(*[node_circles[i].animate.scale(1.15) for i in range(5)], run_time=0.5)
-        self.play(*[node_circles[i].animate.scale(1/1.15) for i in range(5)], run_time=0.5)
+        self.play(*[node_circles[i].animate.scale(1.15) for i in range(5)], run_time=0.34)
+        self.play(*[node_circles[i].animate.scale(1/1.15) for i in range(5)], run_time=0.34)
 
         send_messages(2)
-        self.wait(0.5)
+        self.wait(0.4)
 
         # Round 3
         round3_caption = Text(
             "Round 3: Each node now contains information from 3 hops away",
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, round3_caption), run_time=0.8)
-        self.wait(0.5)
+        self.play(Transform(caption, round3_caption), run_time=0.5)
+        self.wait(0.4)
 
-        self.play(*[node_circles[i].animate.scale(1.15) for i in range(5)], run_time=0.5)
-        self.play(*[node_circles[i].animate.scale(1/1.15) for i in range(5)], run_time=0.5)
+        self.play(*[node_circles[i].animate.scale(1.15) for i in range(5)], run_time=0.34)
+        self.play(*[node_circles[i].animate.scale(1/1.15) for i in range(5)], run_time=0.34)
 
         send_messages(3)
-        self.wait(0.5)
+        self.wait(0.4)
 
         # Highlight node 1 (index 0)
         highlight_caption = Text(
             "Node 1 now contains traces of ALL original colors",
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, highlight_caption), run_time=0.8)
+        self.play(Transform(caption, highlight_caption), run_time=0.5)
 
         # Highlight node 1
         ring = Circle(0.55, color=ACCENT, stroke_width=5).move_to(npos[0])
-        self.play(Create(ring), run_time=0.8)
-        self.wait(0.5)
+        self.play(Create(ring), run_time=0.5)
+        self.wait(0.4)
 
         # Final caption
         final = Text(
@@ -180,5 +177,5 @@ class MessagePassing(Scene):
             font_size=18, color=ACCENT,
         ).to_edge(DOWN, buff=0.4)
 
-        self.play(Transform(caption, final), run_time=0.8)
-        self.wait(2.0)
+        self.play(Transform(caption, final), run_time=0.5)
+        self.wait(0.4)

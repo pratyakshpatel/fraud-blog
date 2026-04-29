@@ -19,14 +19,11 @@ def val_color(v):
 
 class LaplacianQuadratic(Scene):
     def construct(self):
-        title = Text("Laplacian Quadratic Form", font_size=28, color=WHITE).to_edge(UP, buff=0.4)
-        self.play(Write(title), run_time=0.8)
-
         # Formula
-        formula = MathTex(r"x^\top L x = \sum_{(i,j)\in E}(x_i-x_j)^2", font_size=24, color=SOFT).next_to(title, DOWN, buff=0.3)
+        formula = MathTex(r"x^\top L x = \sum_{(i,j)\in E}(x_i-x_j)^2", font_size=24, color=SOFT).to_edge(UP, buff=0.35)
         formula_meaning = Text("measures signal smoothness on the graph", font_size=14, color=ACCENT).next_to(formula, DOWN, buff=0.1)
-        self.play(FadeIn(formula), FadeIn(formula_meaning), run_time=0.8)
-        self.wait(0.5)
+        self.play(FadeIn(formula), FadeIn(formula_meaning), run_time=0.5)
+        self.wait(0.4)
 
         # Graph with two clusters
         npos = {
@@ -72,17 +69,17 @@ class LaplacianQuadratic(Scene):
         self.play(
             Create(intra_lines), Create(bridge_line),
             FadeIn(all_nodes), FadeIn(cluster_labels), FadeIn(caption),
-            run_time=1.0
+            run_time=0.5
         )
-        self.wait(0.8)
+        self.wait(0.4)
 
         # === COMPUTE EDGE COSTS ===
         cost_caption = Text(
             "Compute (x_i - x_j)² for each edge",
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, cost_caption), run_time=0.8)
-        self.wait(0.5)
+        self.play(Transform(caption, cost_caption), run_time=0.5)
+        self.wait(0.4)
 
         # Intra-cluster edges: small costs
         intra_costs = VGroup()
@@ -94,19 +91,19 @@ class LaplacianQuadratic(Scene):
             intra_costs.add(cost_txt)
             # Highlight edge
             highlight = Line(npos[a], npos[b], color=GREEN, stroke_width=4)
-            self.play(Create(highlight), FadeIn(cost_txt), run_time=0.5)
-            self.play(FadeOut(highlight), run_time=0.3)
+            self.play(Create(highlight), FadeIn(cost_txt), run_time=0.34)
+            self.play(FadeOut(highlight), run_time=0.34)
 
         small_note = Text("Small costs — similar values!", font_size=14, color=GREEN).move_to(LEFT * 3.2 + DOWN * 1.3)
-        self.play(FadeIn(small_note), run_time=0.8)
-        self.wait(0.5)
+        self.play(FadeIn(small_note), run_time=0.5)
+        self.wait(0.4)
 
         # Bridge edge: large cost
         bridge_caption = Text(
             "The bridge edge has huge disagreement",
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, bridge_caption), run_time=0.8)
+        self.play(Transform(caption, bridge_caption), run_time=0.5)
 
         bridge_diff = abs(smooth[bridge[0]] - smooth[bridge[1]])
         bridge_cost = bridge_diff ** 2
@@ -116,16 +113,16 @@ class LaplacianQuadratic(Scene):
             (npos[bridge[0]] + npos[bridge[1]]) / 2 + DOWN * 0.35
         )
 
-        self.play(Create(bridge_highlight), FadeIn(bridge_cost_txt), run_time=0.8)
+        self.play(Create(bridge_highlight), FadeIn(bridge_cost_txt), run_time=0.5)
 
         dominates_note = Text("This one edge dominates the total!", font_size=14, color=FRAUD).move_to(DOWN * 1.0)
-        self.play(FadeIn(dominates_note), run_time=0.8)
+        self.play(FadeIn(dominates_note), run_time=0.5)
 
         # Total cost
         total = sum((smooth[a] - smooth[b]) ** 2 for a, b in intra + [bridge])
         total_txt = Text(f"Total x⊤Lx ≈ {total:.3f}", font_size=18, color=ACCENT).move_to(RIGHT * 3.0 + DOWN * 1.8)
-        self.play(FadeIn(total_txt), run_time=0.8)
-        self.wait(1.0)
+        self.play(FadeIn(total_txt), run_time=0.5)
+        self.wait(0.32)
 
         # === ADD MORE BRIDGES ===
         more_caption = Text(
@@ -135,9 +132,9 @@ class LaplacianQuadratic(Scene):
         self.play(
             Transform(caption, more_caption),
             FadeOut(VGroup(intra_costs, small_note, dominates_note, bridge_cost_txt)),
-            run_time=0.8
+            run_time=0.5
         )
-        self.wait(0.5)
+        self.wait(0.4)
 
         # Add more bridge edges
         new_bridges = [(0, 4), (1, 5)]
@@ -155,17 +152,17 @@ class LaplacianQuadratic(Scene):
             self.play(
                 Create(new_line),
                 Transform(total_txt, new_total),
-                run_time=0.8
+                run_time=0.5
             )
 
-        self.wait(0.8)
+        self.wait(0.4)
 
         # === SCRAMBLED SIGNALS ===
         scramble_caption = Text(
             "Scramble the values — disagreement everywhere!",
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, scramble_caption), FadeOut(bridge_highlight), run_time=0.8)
+        self.play(Transform(caption, scramble_caption), FadeOut(bridge_highlight), run_time=0.5)
 
         scrambled = {0: 0.85, 1: 0.12, 2: 0.55, 3: 0.30, 4: 0.90, 5: 0.18}
 
@@ -175,15 +172,15 @@ class LaplacianQuadratic(Scene):
             new_label = Text(f"{scrambled[i]:.2f}", font_size=12, color=WHITE).move_to(npos[i])
             anims.append(Transform(node_labels[i], new_label))
 
-        self.play(*anims, run_time=1.0)
+        self.play(*anims, run_time=0.5)
 
         # Recompute total
         all_edges = intra + [bridge] + new_bridges
         total_scrambled = sum((scrambled[a] - scrambled[b]) ** 2 for a, b in all_edges)
 
         scrambled_total = Text(f"Total x⊤Lx ≈ {total_scrambled:.3f}", font_size=18, color=FRAUD).move_to(RIGHT * 3.0 + DOWN * 1.8)
-        self.play(Transform(total_txt, scrambled_total), run_time=0.8)
-        self.wait(0.5)
+        self.play(Transform(total_txt, scrambled_total), run_time=0.5)
+        self.wait(0.4)
 
         # Final caption
         final = Text(
@@ -191,5 +188,5 @@ class LaplacianQuadratic(Scene):
             font_size=18, color=ACCENT,
         ).to_edge(DOWN, buff=0.4)
 
-        self.play(Transform(caption, final), run_time=0.8)
-        self.wait(2.0)
+        self.play(Transform(caption, final), run_time=0.5)
+        self.wait(0.4)

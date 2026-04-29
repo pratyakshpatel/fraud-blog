@@ -12,9 +12,6 @@ GREEN = "#2ECC71"
 
 class AdjacencyMatrix(Scene):
     def construct(self):
-        title = Text("The Adjacency Matrix", font_size=28, color=WHITE).to_edge(UP, buff=0.4)
-        self.play(Write(title), run_time=0.8)
-
         N = 4
         names = ["A", "B", "C", "D"]
 
@@ -67,83 +64,62 @@ class AdjacencyMatrix(Scene):
             FadeIn(VGroup(*node_circles.values(), *node_labels.values())),
             Create(VGroup(*cells.values())), FadeIn(VGroup(*cell_texts.values())),
             FadeIn(row_labels), FadeIn(col_labels), FadeIn(caption),
-            run_time=1.0,
+            run_time=0.5,
         )
-        self.wait(0.8)
+        self.wait(0.4)
 
         # Track edges
         edge_lines = {}
-        degree_counts = {i: 0 for i in range(N)}
 
-        # Degree panel
-        degree_panel = VGroup(
-            Text("Degrees:", font_size=14, color=ACCENT)
-        ).move_to(RIGHT * 5.0 + UP * 1.0)
-        degree_texts = {}
-        for i in range(N):
-            dt = Text(f"{names[i]}: 0", font_size=12, color=SOFT)
-            degree_texts[i] = dt
-        deg_list = VGroup(*degree_texts.values()).arrange(DOWN, aligned_edge=LEFT, buff=0.1)
-        deg_list.next_to(degree_panel, DOWN, buff=0.15)
-        self.play(FadeIn(degree_panel), FadeIn(deg_list), run_time=0.8)
-
-        def add_edge(a, b):
+        def add_edge(a, b, weight="1", directed=False):
             """Add edge and update matrix."""
             # Draw edge on graph
-            line = Line(npos[a], npos[b], color=LEGIT, stroke_width=2.5)
+            line = (
+                Arrow(npos[a], npos[b], buff=0.32, color=GREEN, stroke_width=2.5, max_tip_length_to_length_ratio=0.16)
+                if directed
+                else Line(npos[a], npos[b], color=LEGIT, stroke_width=2.5)
+            )
             edge_lines[(a, b)] = line
 
             # Update matrix cells
-            new_ab = Text("1", font_size=18, color=ACCENT).move_to(cell_pos(a, b))
-            new_ba = Text("1", font_size=18, color=ACCENT).move_to(cell_pos(b, a))
+            new_ab = Text(weight, font_size=18, color=ACCENT).move_to(cell_pos(a, b))
+            new_ba = Text(weight, font_size=18, color=ACCENT).move_to(cell_pos(b, a))
 
-            # Update degrees
-            degree_counts[a] += 1
-            degree_counts[b] += 1
-
-            new_deg_a = Text(f"{names[a]}: {degree_counts[a]}", font_size=12, color=ACCENT)
-            new_deg_b = Text(f"{names[b]}: {degree_counts[b]}", font_size=12, color=ACCENT)
-            new_deg_a.move_to(degree_texts[a].get_center())
-            new_deg_b.move_to(degree_texts[b].get_center())
-
-            self.play(
+            anims = [
                 Create(line),
                 Transform(cell_texts[(a, b)], new_ab),
-                Transform(cell_texts[(b, a)], new_ba),
                 cells[(a, b)].animate.set_fill(ACCENT, opacity=0.4),
-                cells[(b, a)].animate.set_fill(ACCENT, opacity=0.4),
-                Transform(degree_texts[a], new_deg_a),
-                Transform(degree_texts[b], new_deg_b),
-                run_time=0.8,
-            )
-            self.play(
-                cells[(a, b)].animate.set_fill(NEUTRAL, opacity=0.1),
-                cells[(b, a)].animate.set_fill(NEUTRAL, opacity=0.1),
-                run_time=0.5,
-            )
+            ]
+            if directed:
+                anims.append(cells[(b, a)].animate.set_fill(GREEN, opacity=0.25))
+            else:
+                anims.extend([
+                    Transform(cell_texts[(b, a)], new_ba),
+                    cells[(b, a)].animate.set_fill(ACCENT, opacity=0.4),
+                ])
+            self.play(*anims, run_time=0.5)
+            reset = [cells[(a, b)].animate.set_fill(NEUTRAL, opacity=0.1)]
+            if not directed:
+                reset.append(cells[(b, a)].animate.set_fill(NEUTRAL, opacity=0.1))
+            self.play(*reset, run_time=0.34)
 
-        # Add edges one by one
+        # Start with one edge so Ax is visually easy to read.
         edge_caption = Text(
-            "Each edge creates symmetric 1s — undirected graph",
+            "Add edge A-B: both symmetric cells become 1",
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, edge_caption), run_time=0.8)
-        self.wait(0.5)
+        self.play(Transform(caption, edge_caption), run_time=0.5)
+        self.wait(0.4)
 
         add_edge(0, 1)  # A-B
-        add_edge(0, 2)  # A-C
-        add_edge(1, 3)  # B-D
-        add_edge(2, 3)  # C-D
-
-        self.wait(0.8)
 
         # === MATRIX-VECTOR MULTIPLICATION ===
         ax_caption = Text(
             "Matrix × vector: (Ax)_i = sum of neighbor values",
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, ax_caption), run_time=0.8)
-        self.wait(0.5)
+        self.play(Transform(caption, ax_caption), run_time=0.5)
+        self.wait(0.4)
 
         # Show x vector
         x_vals = ["1", "2", "3", "4"]
@@ -154,24 +130,47 @@ class AdjacencyMatrix(Scene):
         x_label = Text("x", font_size=18, color=GREEN, weight=BOLD).move_to(cell_pos(-0.7, N + 0.8))
         times_sign = MathTex(r"\times", font_size=24, color=SOFT).move_to(cell_pos(1.5, N + 0.3))
 
-        self.play(FadeIn(x_col), FadeIn(x_label), FadeIn(times_sign), run_time=0.8)
+        self.play(FadeIn(x_col), FadeIn(x_label), FadeIn(times_sign), run_time=0.5)
 
         # Highlight row A (index 0)
         row_highlight = VGroup(*[cells[(0, c)].copy().set_fill(ACCENT, opacity=0.5).set_stroke(ACCENT, width=3) for c in range(N)])
-        self.play(FadeIn(row_highlight), run_time=0.8)
+        self.play(FadeIn(row_highlight), run_time=0.5)
 
         # Show computation for row A
-        comp_text = MathTex(r"(Ax)_A = 0 \cdot 1 + 1 \cdot 2 + 1 \cdot 3 + 0 \cdot 4 = 5", font_size=18, color=ACCENT)
+        comp_text = MathTex(r"(Ax)_A = 0 \cdot 1 + 1 \cdot 2 + 0 \cdot 3 + 0 \cdot 4 = 2", font_size=18, color=ACCENT)
         comp_text.move_to(DOWN * 1.8)
-        self.play(FadeIn(comp_text), run_time=0.8)
+        self.play(FadeIn(comp_text), run_time=0.5)
 
         neighbor_note = Text(
-            "= x_B + x_C (neighbors of A)",
+            "= x_B (A's only neighbor)",
             font_size=16, color=ACCENT,
         ).next_to(comp_text, DOWN, buff=0.15)
-        self.play(FadeIn(neighbor_note), run_time=0.8)
+        self.play(FadeIn(neighbor_note), run_time=0.5)
 
-        self.wait(1.0)
+        self.wait(0.32)
+
+        more_edges_caption = Text(
+            "Add more edges: row A collects every connected neighbor",
+            font_size=18, color=SOFT,
+        ).to_edge(DOWN, buff=0.4)
+        self.play(Transform(caption, more_edges_caption), FadeOut(row_highlight), run_time=0.5)
+        add_edge(0, 2)  # A-C
+        add_edge(1, 3)  # B-D
+        add_edge(2, 3)  # C-D
+
+        row_highlight = VGroup(*[cells[(0, c)].copy().set_fill(ACCENT, opacity=0.5).set_stroke(ACCENT, width=3) for c in range(N)])
+        new_comp = MathTex(r"(Ax)_A = x_B + x_C = 2 + 3 = 5", font_size=18, color=ACCENT).move_to(DOWN * 1.8)
+        new_note = Text("Matrix multiplication is neighbor aggregation", font_size=16, color=ACCENT).next_to(new_comp, DOWN, buff=0.15)
+        self.play(FadeIn(row_highlight), Transform(comp_text, new_comp), Transform(neighbor_note, new_note), run_time=0.5)
+        self.wait(0.4)
+
+        directed_caption = Text(
+            "Weighted directed edge: only one matrix cell changes",
+            font_size=18, color=SOFT,
+        ).to_edge(DOWN, buff=0.4)
+        self.play(Transform(caption, directed_caption), FadeOut(row_highlight), run_time=0.5)
+        add_edge(3, 0, weight="2.5", directed=True)
+        self.wait(0.32)
 
         # Final caption
         final = Text(
@@ -179,5 +178,5 @@ class AdjacencyMatrix(Scene):
             font_size=18, color=ACCENT,
         ).to_edge(DOWN, buff=0.4)
 
-        self.play(Transform(caption, final), run_time=0.8)
-        self.wait(2.0)
+        self.play(Transform(caption, final), run_time=0.5)
+        self.wait(0.4)

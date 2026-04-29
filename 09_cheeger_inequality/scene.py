@@ -23,14 +23,10 @@ def cluster_nodes(n, cx, cy, radius=1.0, seed=0):
 
 class CheegerInequality(Scene):
     def construct(self):
-        title = Text("Cheeger's Inequality", font_size=28, color=WHITE).to_edge(UP, buff=0.4)
-        self.play(Write(title), run_time=0.8)
-
         # Cheeger's inequality formula
-        formula = MathTex(r"\frac{h^2}{2} \;\leq\; \lambda_2 \;\leq\; 2h", font_size=26, color=SOFT).next_to(title, DOWN, buff=0.25)
-        formula_meaning = Text("(h = Cheeger constant = min cut ratio)", font_size=12, color=ACCENT).next_to(formula, DOWN, buff=0.1)
-        self.play(FadeIn(formula), FadeIn(formula_meaning), run_time=0.8)
-        self.wait(0.5)
+        formula = MathTex(r"\frac{h^2}{2} \;\leq\; \lambda_2 \;\leq\; 2h", font_size=26, color=SOFT).to_edge(UP, buff=0.35)
+        self.play(FadeIn(formula), run_time=0.5)
+        self.wait(0.4)
 
         # Two clusters
         n = 12
@@ -65,15 +61,11 @@ class CheegerInequality(Scene):
             Create(left_edges), Create(right_edges),
             FadeIn(left_dots), FadeIn(right_dots),
             Create(bridge_line), FadeIn(caption),
-            run_time=1.0,
+            run_time=0.5,
         )
-        self.wait(0.5)
+        self.wait(0.4)
 
-        # Metrics panel
-        panel = VGroup(
-            Text("Metrics:", font_size=16, color=ACCENT),
-        ).move_to(RIGHT * 5.2 + UP * 1.5)
-
+        # Live values
         h_label = Text("h = ", font_size=14, color=SOFT)
         h_val = DecimalNumber(1 / n, num_decimal_places=3, font_size=14, color=GREEN)
         h_row = VGroup(h_label, h_val).arrange(RIGHT, buff=0.1)
@@ -82,18 +74,16 @@ class CheegerInequality(Scene):
         l2_val = DecimalNumber(0.04, num_decimal_places=3, font_size=14, color=LEGIT)
         l2_row = VGroup(l2_label, l2_val).arrange(RIGHT, buff=0.1)
 
-        metrics = VGroup(h_row, l2_row).arrange(DOWN, aligned_edge=LEFT, buff=0.15)
-        metrics.next_to(panel, DOWN, buff=0.2)
-
-        self.play(FadeIn(panel), FadeIn(metrics), run_time=0.8)
-        self.wait(0.5)
+        metrics = VGroup(h_row, l2_row).arrange(DOWN, aligned_edge=LEFT, buff=0.15).move_to(RIGHT * 5.0 + UP * 1.2)
+        self.play(FadeIn(metrics), run_time=0.5)
+        self.wait(0.4)
 
         # Explain Cheeger constant
         h_caption = Text(
             "h = edges cut / min(|S|, |V-S|) = 1/12 — easy to cut!",
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, h_caption), run_time=0.8)
+        self.play(Transform(caption, h_caption), run_time=0.5)
 
         # Highlight the cut
         cut_line = DashedLine(
@@ -101,16 +91,16 @@ class CheegerInequality(Scene):
             color=ACCENT, stroke_width=3, dash_length=0.15
         )
         cut_label = Text("cut", font_size=14, color=ACCENT).next_to(cut_line, UP, buff=0.1)
-        self.play(Create(cut_line), FadeIn(cut_label), run_time=0.8)
-        self.wait(0.8)
+        self.play(Create(cut_line), FadeIn(cut_label), run_time=0.5)
+        self.wait(0.4)
 
         # === ADD MORE BRIDGES ===
         bridge_caption = Text(
             "Add cross-edges — cutting gets harder, both h and λ₂ rise",
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, bridge_caption), FadeOut(VGroup(cut_line, cut_label)), run_time=0.8)
-        self.wait(0.5)
+        self.play(Transform(caption, bridge_caption), FadeOut(VGroup(cut_line, cut_label)), run_time=0.5)
+        self.wait(0.4)
 
         # Extra bridge edges
         extra_bridges = [
@@ -130,17 +120,37 @@ class CheegerInequality(Scene):
                 Create(new_bridge),
                 ChangeDecimalToValue(h_val, round(hv, 3)),
                 ChangeDecimalToValue(l2_val, round(l2v, 3)),
-                run_time=0.8
+                run_time=0.5
             )
 
-        self.wait(0.8)
+        self.wait(0.4)
+
+        dense_caption = Text(
+            "Well-connected graph: many cross-edges, no easy cut",
+            font_size=18, color=SOFT,
+        ).to_edge(DOWN, buff=0.4)
+        dense_bridges = [
+            (left_pos[1], right_pos[4]),
+            (left_pos[4], right_pos[10]),
+            (left_pos[8], right_pos[1]),
+            (left_pos[11], right_pos[7]),
+        ]
+        dense_lines = VGroup(*[Line(a, b, color=GREEN, stroke_width=2.2) for a, b in dense_bridges])
+        self.play(
+            Transform(caption, dense_caption),
+            Create(dense_lines, lag_ratio=0.12),
+            ChangeDecimalToValue(h_val, 0.55),
+            ChangeDecimalToValue(l2_val, 0.48),
+            run_time=0.5,
+        )
+        self.wait(0.4)
 
         # === SHOW INEQUALITY BOUNDS ===
         bounds_caption = Text(
             "λ₂ always stays within the Cheeger bounds",
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, bounds_caption), run_time=0.8)
+        self.play(Transform(caption, bounds_caption), run_time=0.5)
 
         # Create a visual bounds diagram
         bound_center = RIGHT * 0.0 + DOWN * 1.8
@@ -152,13 +162,7 @@ class CheegerInequality(Scene):
 
         # Number line
         num_line = Line(bound_center + LEFT * 2.5, bound_center + RIGHT * 2.5, color=SOFT, stroke_width=2)
-        num_labels = VGroup(
-            Text("0", font_size=12, color=SOFT).move_to(bound_center + LEFT * 2.5 + DOWN * 0.25),
-            Text("0.5", font_size=12, color=SOFT).move_to(bound_center + DOWN * 0.25),
-            Text("1.0", font_size=12, color=SOFT).move_to(bound_center + RIGHT * 2.5 + DOWN * 0.25),
-        )
-
-        self.play(Create(num_line), FadeIn(num_labels), run_time=0.8)
+        self.play(Create(num_line), run_time=0.5)
 
         # Mark bounds
         scale = 5.0  # 0-1 maps to -2.5 to +2.5
@@ -167,13 +171,13 @@ class CheegerInequality(Scene):
         l2_x = bound_center + LEFT * 2.5 + RIGHT * l2_current * scale
 
         lower_mark = Line(lower_x + UP * 0.15, lower_x + DOWN * 0.15, color=GREEN, stroke_width=4)
-        lower_label = MathTex(r"\frac{h^2}{2}", font_size=14, color=GREEN).next_to(lower_mark, UP, buff=0.1)
+        lower_label = MathTex(r"\frac{h^2}{2}", font_size=13, color=GREEN).next_to(lower_mark, UP, buff=0.1)
 
         upper_mark = Line(upper_x + UP * 0.15, upper_x + DOWN * 0.15, color=FRAUD, stroke_width=4)
-        upper_label = MathTex(r"2h", font_size=14, color=FRAUD).next_to(upper_mark, UP, buff=0.1)
+        upper_label = MathTex(r"2h", font_size=13, color=FRAUD).next_to(upper_mark, UP, buff=0.1)
 
         l2_dot = Circle(radius=0.1, color=ACCENT, fill_color=ACCENT, fill_opacity=0.9).move_to(l2_x)
-        l2_label = MathTex(r"\lambda_2", font_size=14, color=ACCENT).next_to(l2_dot, DOWN, buff=0.15)
+        l2_label = MathTex(r"\lambda_2", font_size=13, color=ACCENT).next_to(l2_dot, DOWN, buff=0.15)
 
         # Valid region
         valid_region = Rectangle(
@@ -186,9 +190,9 @@ class CheegerInequality(Scene):
             Create(lower_mark), FadeIn(lower_label),
             Create(upper_mark), FadeIn(upper_label),
             FadeIn(l2_dot), FadeIn(l2_label),
-            run_time=1.0
+            run_time=0.5
         )
-        self.wait(0.5)
+        self.wait(0.4)
 
         # Final caption
         final = Text(
@@ -196,5 +200,5 @@ class CheegerInequality(Scene):
             font_size=18, color=ACCENT,
         ).to_edge(DOWN, buff=0.4)
 
-        self.play(Transform(caption, final), run_time=0.8)
-        self.wait(2.0)
+        self.play(Transform(caption, final), run_time=0.5)
+        self.wait(0.4)

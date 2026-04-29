@@ -13,9 +13,6 @@ GREEN = "#2ECC71"
 
 class OverSmoothingSquashing(Scene):
     def construct(self):
-        title = Text("Over-Smoothing & Over-Squashing", font_size=28, color=WHITE).to_edge(UP, buff=0.4)
-        self.play(Write(title), run_time=0.8)
-
         # === OVER-SMOOTHING ===
         # 10 nodes arranged with clear class distinction
         npos = {i: np.array([-4.0 + i * 0.9, 0.8, 0]) for i in range(10)}
@@ -31,10 +28,6 @@ class OverSmoothingSquashing(Scene):
         all_nodes = VGroup(*node_c.values())
         all_labels = VGroup(*node_labels.values())
 
-        # Class labels
-        fraud_label = Text("Fraud", font_size=12, color=FRAUD).next_to(node_c[2], DOWN, buff=0.25)
-        legit_label = Text("Legit", font_size=12, color=LEGIT).next_to(node_c[7], DOWN, buff=0.25)
-
         caption = Text(
             "Distinct classes: 5 fraud (red) vs 5 legit (blue)",
             font_size=18, color=SOFT,
@@ -42,14 +35,10 @@ class OverSmoothingSquashing(Scene):
 
         self.play(
             Create(edge_lines), FadeIn(all_nodes), FadeIn(all_labels),
-            FadeIn(fraud_label), FadeIn(legit_label), FadeIn(caption),
-            run_time=1.0
+            FadeIn(caption),
+            run_time=0.5
         )
-        self.wait(0.8)
-
-        # Layer counter
-        layer_label = Text("Layer: 0", font_size=16, color=SOFT).move_to(RIGHT * 5.5 + UP * 2.2)
-        self.play(FadeIn(layer_label), run_time=0.5)
+        self.wait(0.4)
 
         # Simulate over-smoothing over multiple layers
         for layer_num, t_val in enumerate([0.2, 0.45, 0.75, 1.0], start=1):
@@ -60,24 +49,39 @@ class OverSmoothingSquashing(Scene):
                 mixed = rgb_to_color(r1 + (r2 - r1) * t_val)
                 nc_anims.append(node_c[i].animate.set_color(mixed).set_fill(mixed))
 
-            new_layer = Text(f"Layer: {layer_num}", font_size=16, color=SOFT).move_to(RIGHT * 5.5 + UP * 2.2)
-
-            self.play(*nc_anims, Transform(layer_label, new_layer), run_time=0.8)
-            self.wait(0.5)
+            self.play(*nc_anims, run_time=0.5)
+            self.wait(0.4)
 
         smooth_caption = Text(
             "All nodes converge to same color — classes indistinguishable!",
             font_size=18, color=FRAUD,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, smooth_caption), run_time=0.8)
-        self.wait(1.0)
+        self.play(Transform(caption, smooth_caption), run_time=0.5)
+        self.wait(0.32)
+
+        residual_caption = Text(
+            "Residual connections keep part of the original identity",
+            font_size=18, color=SOFT,
+        ).to_edge(DOWN, buff=0.4)
+        residual_anims = []
+        for i in range(10):
+            base = np.array(color_to_rgb(colors_init[i]))
+            gray = np.array(color_to_rgb(NEUTRAL))
+            preserved = rgb_to_color(base + (gray - base) * 0.35)
+            residual_anims.append(node_c[i].animate.set_color(preserved).set_fill(preserved))
+        skip_arcs = VGroup(*[
+            ArcBetweenPoints(npos[i] + UP * 0.3, npos[i + 2] + UP * 0.3, angle=-TAU / 5, color=GREEN, stroke_width=2)
+            for i in range(0, 8, 2)
+        ])
+        self.play(Transform(caption, residual_caption), Create(skip_arcs, lag_ratio=0.1), *residual_anims, run_time=0.5)
+        self.wait(0.4)
 
         # Clear for Over-Squashing
         self.play(
-            FadeOut(VGroup(all_nodes, all_labels, edge_lines, fraud_label, legit_label, layer_label)),
-            run_time=0.8
+            FadeOut(VGroup(all_nodes, all_labels, edge_lines, skip_arcs)),
+            run_time=0.5
         )
-        self.wait(0.5)
+        self.wait(0.4)
 
         # === OVER-SQUASHING ===
         n_chain = 9
@@ -98,18 +102,9 @@ class OverSmoothingSquashing(Scene):
         self.play(
             Create(chain_edges), FadeIn(VGroup(*chain_nodes.values())),
             FadeIn(src_lbl), FadeIn(tgt_lbl), Transform(caption, squash_caption),
-            run_time=0.8,
+            run_time=0.5,
         )
-        self.wait(0.5)
-
-        # Signal strength bar
-        signal_bar_bg = Rectangle(width=3.0, height=0.25, color=SOFT, fill_color=SOFT, fill_opacity=0.2, stroke_width=1)
-        signal_bar_bg.move_to(RIGHT * 4.5 + DOWN * 1.0)
-        signal_bar = Rectangle(width=3.0, height=0.25, color=ACCENT, fill_color=ACCENT, fill_opacity=0.8, stroke_width=0)
-        signal_bar.move_to(signal_bar_bg.get_center())
-        signal_label = Text("Signal strength", font_size=10, color=SOFT).next_to(signal_bar_bg, UP, buff=0.08)
-
-        self.play(FadeIn(signal_bar_bg), FadeIn(signal_bar), FadeIn(signal_label), run_time=0.8)
+        self.wait(0.4)
 
         # Animate signal traveling and fading (squashing)
         signal = Circle(radius=0.15, color=ACCENT, fill_color=ACCENT, fill_opacity=0.9).move_to(cx[0])
@@ -117,55 +112,33 @@ class OverSmoothingSquashing(Scene):
 
         for i in range(1, n_chain):
             new_opacity = max(0.08, 1.0 - i * 0.12)
-            new_width = max(0.1, 3.0 * (1.0 - i * 0.12))
-            new_bar = Rectangle(width=new_width, height=0.25, color=ACCENT, fill_color=ACCENT, fill_opacity=0.8, stroke_width=0)
-            new_bar.align_to(signal_bar_bg, LEFT).move_to(signal_bar_bg.get_center(), coor_mask=[0, 1, 1])
 
             self.play(
                 signal.animate.move_to(cx[i]).set_opacity(new_opacity),
-                Transform(signal_bar, new_bar),
-                run_time=0.4
+                run_time=0.5
             )
 
         squash_result = Text(
             "Signal almost gone by hop 8 — critical info lost!",
             font_size=18, color=FRAUD,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, squash_result), run_time=0.8)
-        self.wait(0.8)
+        self.play(Transform(caption, squash_result), run_time=0.5)
+        self.wait(0.4)
 
-        # === SOLUTIONS ===
-        self.play(FadeOut(signal), FadeOut(signal_bar), FadeOut(signal_bar_bg), FadeOut(signal_label), run_time=0.5)
-        self.wait(0.5)
+        # === SOLUTION ===
+        self.play(FadeOut(signal), run_time=0.34)
+        self.wait(0.4)
 
-        solutions_label = Text("Solutions", font_size=20, color=GREEN).move_to(UP * 2.2)
-        self.play(FadeIn(solutions_label), run_time=0.8)
-
-        # Solution 1: Residual connection
-        sol1_caption = Text(
-            "Solution 1: Residual connections (skip links)",
+        sol_caption = Text(
+            "Virtual node creates a shortcut: source to hub to target",
             font_size=18, color=SOFT,
         ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, sol1_caption), run_time=0.8)
-
-        # Show skip connection from node 0 to node 4
-        skip_arc = ArcBetweenPoints(cx[0] + UP * 0.3, cx[4] + UP * 0.3, angle=-TAU / 4, color=GREEN, stroke_width=3)
-        skip_label = Text("skip", font_size=10, color=GREEN).move_to(cx[2] + UP * 0.9)
-        self.play(Create(skip_arc), FadeIn(skip_label), run_time=0.8)
-        self.wait(0.8)
-
-        # Solution 2: Virtual super-node
-        sol2_caption = Text(
-            "Solution 2: Virtual super-node (shortcut hub)",
-            font_size=18, color=SOFT,
-        ).to_edge(DOWN, buff=0.4)
-        self.play(Transform(caption, sol2_caption), run_time=0.8)
+        self.play(Transform(caption, sol_caption), run_time=0.5)
 
         # Add virtual node
         virtual_pos = np.array([0.0, -1.5, 0])
         virtual_node = Circle(0.35, color=PURPLE, fill_color=PURPLE, fill_opacity=0.9).move_to(virtual_pos)
         virtual_label = Text("V", font_size=14, color=WHITE).move_to(virtual_pos)
-        virtual_text = Text("virtual", font_size=10, color=PURPLE).next_to(virtual_node, DOWN, buff=0.08)
 
         # Edges from virtual to several nodes
         virtual_edges = VGroup(
@@ -175,10 +148,10 @@ class OverSmoothingSquashing(Scene):
         )
 
         self.play(
-            Create(virtual_edges), FadeIn(virtual_node), FadeIn(virtual_label), FadeIn(virtual_text),
-            run_time=0.8
+            Create(virtual_edges), FadeIn(virtual_node), FadeIn(virtual_label),
+            run_time=0.5
         )
-        self.wait(0.8)
+        self.wait(0.4)
 
         # Final caption
         final_caption = Text(
@@ -186,5 +159,5 @@ class OverSmoothingSquashing(Scene):
             font_size=18, color=ACCENT,
         ).to_edge(DOWN, buff=0.4)
 
-        self.play(Transform(caption, final_caption), run_time=0.8)
-        self.wait(2.0)
+        self.play(Transform(caption, final_caption), run_time=0.5)
+        self.wait(0.4)
